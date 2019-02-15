@@ -1,0 +1,63 @@
+
+G_MsTiempoPrudente 	int := 20;
+G_Estado						String := 'Pulsar';
+A_Esclavos					Arreglos de esclavos;	//Indexado por numero, cada numero representa un esclavo y contiene informacion del esclavo. Habria que crear un tipo record especifico.
+Type_A_Esclavos{
+	activo
+	posicionActual
+	posicionFutura
+	ultimaConsulta
+	rechazos
+}
+C_ConsultaEsclavos	ColaConsulta; //Ver si hay una estructura para esto
+
+int ProximoColaConsulta(){
+	//Implementar con C_ConsultaEsclavos
+}
+
+boolean Inactivo(){
+	return G_Estado not in ('Enviar');
+}
+
+void Control(){
+	if Inactivo(){
+		Consultar(ProximoColaConsulta);
+	}
+}
+
+void Enviar (){
+	if G_Estado = 'Enviar'{
+		SetearPinEnvioHIGH;
+		angulo := LeerPotenciometro;
+		EnviarAngulo;
+		flush;
+		SetearPinEnvioLOW;
+		G_Estado = 'FinEnviar';
+	}
+}
+
+void Pulsar () {
+	if G_Estado = 'Pulsar'{
+		if pin = LOW{
+			ResetearContador();
+		}
+		
+		IF pin = HIGH{
+			IncrementarContador();
+		}
+		
+		IF (pin = HIGH y el contador > G_MsTiempoPrudente){
+			G_Estado := 'Enviar';
+		}
+	}elsif G_Estado = 'FinEnviar'{
+		if pin = LOW{
+			G_Estado := 'Pulsar';
+		}
+	}
+}
+
+void loop(){
+	Control();
+	Pulsar();
+	Enviar();
+}
